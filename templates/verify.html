@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Notice Authenticity – NoticeShield{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1.5 fw-semibold mb-2">
+                    <i class="bi bi-shield-check me-1"></i> STUDENT VERIFICATION PORTAL
+                </span>
+                <h2 class="fw-bold text-dark">Verify Official Notice Authenticity</h2>
+                <p class="text-muted max-w-700 mx-auto small">
+                    Received a college circular on WhatsApp, Telegram, or social media? Upload the screenshot, photo, or PDF below. NoticeShield inspects the cryptographic seal and uses OCR to detect modified dates, venues, or text.
+                </p>
+            </div>
+
+            <!-- Upload Card -->
+            <div class="card-custom p-4 p-md-5 shadow-sm mb-4">
+                <form id="verify-form" method="POST" action="{{ url_for('verify_notice') }}" enctype="multipart/form-data">
+                    
+                    <!-- Drag and Drop Zone -->
+                    <div id="dropzone" class="dropzone-container mb-3">
+                        <i class="bi bi-cloud-arrow-up-fill dropzone-icon"></i>
+                        <h5 class="fw-bold text-dark mb-1">Drag and drop your notice here</h5>
+                        <p class="text-muted small mb-3">or click to browse from your device</p>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-1 font-monospace">
+                            PNG, JPG, JPEG, or PDF (Max 16MB)
+                        </span>
+                        <input type="file" id="notice_file" name="notice_file" class="d-none" accept=".png,.jpg,.jpeg,.pdf" required>
+                    </div>
+
+                    <!-- Selected File Info & Live Preview -->
+                    <div id="preview-container" class="p-3 bg-light rounded-3 mb-4 border d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-dark"><i class="bi bi-file-earmark-check text-success me-1"></i> Selected File:</span>
+                            <span id="file-name-display" class="font-monospace small text-muted"></span>
+                        </div>
+                        <div class="text-center mt-2">
+                            <img id="preview-image" src="#" alt="Preview" class="img-fluid rounded border shadow-sm d-none" style="max-height: 250px;">
+                            <div id="preview-pdf-text" class="text-primary fw-semibold p-3 d-none">
+                                <i class="bi bi-file-earmark-pdf fs-1 d-block mb-1"></i>
+                                <span>PDF Document Selected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optional Fallback Notice ID -->
+                    <div class="mb-4">
+                        <label for="manual_notice_id" class="form-label small text-secondary fw-semibold">
+                            Optional Notice ID (Fallback if QR is heavily cropped or obscured)
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-upc-scan"></i></span>
+                            <input type="text" class="form-control" id="manual_notice_id" name="manual_notice_id" 
+                                   placeholder="e.g., NS-2026-NEURO01" value="{{ prefill_id }}">
+                        </div>
+                        <div class="form-text small">NoticeShield automatically scans the embedded QR code first. You only need this if the QR code is missing.</div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" id="verify-btn" class="btn btn-primary-custom btn-lg py-3">
+                            <i class="bi bi-shield-shaded me-1"></i> Begin Authentication & Tamper Check
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Loading overlay indicator -->
+                <div id="loading-overlay" class="text-center py-4 d-none">
+                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                    <h5 class="fw-bold text-dark">Processing Verification Pipeline...</h5>
+                    <p class="text-muted small">
+                        Reading QR seal • Checking Ed25519 digital signature • Running local OCR semantic analysis
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hackathon Quick-Test Helper Card -->
+            <div class="card-custom p-4 border border-info border-opacity-50 bg-light">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
+                    <h5 class="fw-bold text-dark mb-0">Hackathon Evaluation Demo Scenarios</h5>
+                </div>
+                <p class="text-muted small mb-3">
+                    Click any scenario below to download or test sample test notices prepared for the NEUROFORGE 2026 evaluation:
+                </p>
+                <div class="row g-2">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-2.5 bg-white rounded border h-100 text-center">
+                            <span class="badge bg-success mb-1">TEST 1</span>
+                            <div class="fw-bold small">Genuine Notice</div>
+                            <div class="text-muted extra-small mb-2">Original PDF/Image with valid QR & fields</div>
+                            <a href="{{ url_for('download_image', notice_id='NS-2026-NEURO01') }}" download class="btn btn-sm btn-outline-success w-100">
+                                <i class="bi bi-download me-1"></i> Get Genuine
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-2.5 bg-white rounded border h-100 text-center">
+                            <span class="badge bg-danger mb-1">TEST 2</span>
+                            <div class="fw-bold small">Modified Notice</div>
+                            <div class="text-muted extra-small mb-2">Changed event date or venue with original QR</div>
+                            <a href="/uploads/test_modified_notice.png" download class="btn btn-sm btn-outline-danger w-100">
+                                <i class="bi bi-download me-1"></i> Get Modified
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-2.5 bg-white rounded border h-100 text-center">
+                            <span class="badge bg-warning text-dark mb-1">TEST 3</span>
+                            <div class="fw-bold small">Unknown Notice</div>
+                            <div class="text-muted extra-small mb-2">Notice with unknown ID or no QR code</div>
+                            <a href="/uploads/test_unknown_notice.png" download class="btn btn-sm btn-outline-warning w-100">
+                                <i class="bi bi-download me-1"></i> Get Unknown
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="p-2.5 bg-white rounded border h-100 text-center">
+                            <span class="badge bg-secondary mb-1">TEST 4</span>
+                            <div class="fw-bold small">Revoked Notice</div>
+                            <div class="text-muted extra-small mb-2">Legitimate notice cancelled by admin</div>
+                            <a href="{{ url_for('verify_notice', notice_id='NS-2026-REVOKED01') }}" class="btn btn-sm btn-outline-secondary w-100">
+                                <i class="bi bi-slash-circle me-1"></i> Test Revoked
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Steps Explanation -->
+            <div class="mt-4 p-4 card-custom bg-white">
+                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Under the Hood: NoticeShield 7-Step Verification Procedure</h6>
+                <div class="row g-3 small text-muted">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><strong class="text-dark">Step 1:</strong> OpenCV QR detection with adaptive thresholding & upscaling.</li>
+                            <li class="mb-2"><strong class="text-dark">Step 2:</strong> Unique Notice ID parsed from verification payload.</li>
+                            <li class="mb-2"><strong class="text-dark">Step 3:</strong> Official notice retrieved from tamper-proof SQLite registry.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><strong class="text-dark">Step 4:</strong> Ed25519 digital signature verified with university public key.</li>
+                            <li class="mb-2"><strong class="text-dark">Step 5:</strong> Visible notice text extracted via local EasyOCR & PyMuPDF.</li>
+                            <li class="mb-2"><strong class="text-dark">Step 6:</strong> Semantic comparison of Title, Date, Venue, and Instructions.</li>
+                            <li class="mb-0"><strong class="text-dark">Step 7:</strong> Transparent audit report generated with verdict badges.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

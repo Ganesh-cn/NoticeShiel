@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / Editor configuration
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large binary model weights (EasyOCR automatically downloads these if missing)
+easyocr_models/*.pth
+
+# User uploads (keep directory with .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+# Temporary / testing artifacts
+*.tmp
+*.log
+
+# Operating System specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

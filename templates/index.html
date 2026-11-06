@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}NoticeShield – Trust Every Notice. Verify Before You Believe.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center text-lg-start">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill bg-dark border border-info border-opacity-25 text-info mb-3 small fw-semibold">
+                    <i class="bi bi-award-fill"></i> NEUROFORGE 2026 AI HACKATHON • GM UNIVERSITY
+                </div>
+                <h1 class="hero-title mb-2">
+                    Notice<span class="text-info">Shield</span>
+                </h1>
+                <p class="hero-tagline">
+                    "Trust Every Notice. Verify Before You Believe."
+                </p>
+                <p class="hero-desc">
+                    <strong>THE FORWARDED SEAL:</strong> College circulars forwarded on WhatsApp or social media suffer from compression, cropping, and screenshot tampering. NoticeShield pairs <strong>Ed25519 digital signatures</strong> with <strong>AI Optical Character Recognition (OCR)</strong> to verify whether received notices are genuine, altered, or forged.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-4">
+                    {% if session.get('admin_logged_in') %}
+                        <a href="{{ url_for('create_notice') }}" class="btn btn-success-custom btn-lg d-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-plus-fill fs-5"></i> Register Notice
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('admin_login') }}" class="btn btn-outline-light btn-lg d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-lock fs-5"></i> Admin Login
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- ── Inline Quick-Upload Card ── -->
+                <div class="card bg-dark border border-info border-opacity-30 rounded-4 shadow-lg p-4" style="max-width:520px;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-40 px-3 py-1 fw-semibold">
+                            <i class="bi bi-upload me-1"></i> QUICK VERIFY
+                        </span>
+                        <small class="text-secondary">Upload &amp; verify instantly</small>
+                    </div>
+
+                    <form id="home-verify-form" method="POST" action="{{ url_for('verify_notice') }}" enctype="multipart/form-data">
+                        <!-- Drop zone -->
+                        <div id="home-dropzone"
+                             class="rounded-3 border border-secondary border-opacity-50 border-dashed text-center py-4 px-3 mb-3"
+                             style="cursor:pointer; background:rgba(255,255,255,0.04); transition:background .2s;"
+                             onclick="document.getElementById('home-file-input').click()"
+                             ondragover="event.preventDefault(); this.style.background='rgba(13,202,240,0.08)';"
+                             ondragleave="this.style.background='rgba(255,255,255,0.04)';"
+                             ondrop="handleHomeDrop(event)">
+                            <i class="bi bi-cloud-arrow-up-fill text-info fs-1 mb-2 d-block"></i>
+                            <div class="fw-semibold text-white mb-1">Drag &amp; drop your notice here</div>
+                            <div class="text-secondary small mb-3">or click to browse from your device</div>
+                            <span class="badge bg-secondary bg-opacity-25 text-secondary border px-3 py-1 font-monospace small">
+                                PNG · JPG · JPEG · PDF &nbsp;|&nbsp; Max 16 MB
+                            </span>
+                            <input type="file" id="home-file-input" name="notice_file"
+                                   class="d-none" accept=".png,.jpg,.jpeg,.pdf" required
+                                   onchange="previewHomeFile(this)">
+                        </div>
+
+                        <!-- Preview strip -->
+                        <div id="home-preview" class="d-none mb-3 p-2 rounded-3 border border-secondary border-opacity-30 bg-black bg-opacity-25">
+                            <div class="d-flex align-items-center justify-content-between small text-secondary mb-1">
+                                <span><i class="bi bi-file-earmark-check text-success me-1"></i> <strong class="text-white" id="home-fname"></strong></span>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 lh-1" onclick="clearHomeFile()" title="Remove">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            </div>
+                            <div class="text-center">
+                                <img id="home-img-preview" src="#" alt="preview"
+                                     class="img-fluid rounded d-none" style="max-height:160px;">
+                                <div id="home-pdf-badge" class="d-none text-info fw-semibold py-2">
+                                    <i class="bi bi-file-earmark-pdf fs-2 d-block"></i> PDF Selected
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" id="home-verify-btn"
+                                class="btn btn-primary-custom w-100 py-2 fw-semibold"
+                                onclick="showHomeLoading()">
+                            <i class="bi bi-shield-shaded me-1"></i> Verify This Notice
+                        </button>
+
+                        <!-- Spinner (shown after submit) -->
+                        <div id="home-loading" class="d-none text-center mt-3">
+                            <div class="spinner-border spinner-border-sm text-info me-2" role="status"></div>
+                            <small class="text-secondary">Running 7-step verification pipeline…</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Hero Graphic Card -->
+            <div class="col-lg-5">
+                <div class="card bg-dark border-secondary border-opacity-50 text-white p-4 shadow-lg rounded-4">
+                    <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-50 pb-3 mb-3">
+                        <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-50 px-3 py-1">
+                            <i class="bi bi-shield-fill-check me-1"></i> System Status: Online
+                        </span>
+                        <small class="text-secondary font-monospace">Ed25519 Active</small>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-black bg-opacity-40 rounded-3 border border-secondary border-opacity-25">
+                        <div class="p-2.5 rounded-3 bg-success bg-opacity-25 text-success fs-3">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <div class="small text-secondary">Verified Genuine Notices</div>
+                            <div class="fs-4 fw-bold text-white">{{ stats.verified_count }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-black bg-opacity-40 rounded-3 border border-secondary border-opacity-25">
+                        <div class="p-2.5 rounded-3 bg-danger bg-opacity-25 text-danger fs-3">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+                        <div>
+                            <div class="small text-secondary">Tampered Circulars Detected</div>
+                            <div class="fs-4 fw-bold text-white">{{ stats.modified_count }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 p-3 bg-black bg-opacity-40 rounded-3 border border-secondary border-opacity-25">
+                        <div class="p-2.5 rounded-3 bg-info bg-opacity-25 text-info fs-3">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div>
+                            <div class="small text-secondary">Total Registered Notices</div>
+                            <div class="fs-4 fw-bold text-white">{{ stats.total_notices }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="badge bg-light text-primary border px-3 py-1.5 fw-semibold mb-2">VERIFICATION WORKFLOW</span>
+            <h2 class="fw-bold text-dark">How NoticeShield Protects College Notices</h2>
+            <p class="text-muted max-w-700 mx-auto">
+                Simple QR codes can be copied and pasted onto fake posters. NoticeShield combines asymmetric cryptography with AI OCR content inspection to ensure complete tamper detection.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom h-100 p-4 text-center">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 fs-3 mb-3 mx-auto">
+                        <i class="bi bi-key-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">1. Digital Signing</h5>
+                    <p class="text-muted small">
+                        Administrators register notice fields. The system forms canonical JSON and signs it with a backend Ed25519 private key.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom h-100 p-4 text-center">
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex p-3 fs-3 mb-3 mx-auto">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                    <h5 class="fw-bold">2. Tamper-Proof QR</h5>
+                    <p class="text-muted small">
+                        A high-error-correction QR code containing the unique Notice ID is embedded into the official downloadable PDF notice.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom h-100 p-4 text-center">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex p-3 fs-3 mb-3 mx-auto">
+                        <i class="bi bi-file-earmark-medical"></i>
+                    </div>
+                    <h5 class="fw-bold">3. Multi-Pass OCR</h5>
+                    <p class="text-muted small">
+                        When a student uploads a screenshot or forwarded image, OpenCV extracts the QR and EasyOCR reads the visible text.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card-custom h-100 p-4 text-center">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex p-3 fs-3 mb-3 mx-auto">
+                        <i class="bi bi-check2-all"></i>
+                    </div>
+                    <h5 class="fw-bold">4. Dual Validation</h5>
+                    <p class="text-muted small">
+                        The public key validates the signature, while semantic analysis compares dates, venue, and title against the official ledger.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Security Features Section -->
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-dark text-info border border-info border-opacity-25 px-3 py-1.5 fw-semibold mb-2">CYBERSECURITY ARCHITECTURE</span>
+                <h2 class="fw-bold text-dark mb-4">Why Standard Image Hashes Fail and How NoticeShield Solves It</h2>
+                <div class="d-flex gap-3 mb-4">
+                    <div class="text-danger fs-4"><i class="bi bi-x-circle-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Standard SHA-256 Image Hashes Break on Forwarding</h6>
+                        <p class="text-muted small mb-0">
+                            WhatsApp, Telegram, and screenshotting recompress image pixels. A single changed pixel alters an entire file hash, causing false tampering alarms for genuine notices.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mb-4">
+                    <div class="text-success fs-4"><i class="bi bi-check-circle-fill"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">NoticeShield Signs Canonical Semantic Data</h6>
+                        <p class="text-muted small mb-0">
+                            We sign deterministic canonical JSON (title, dates, venue, issuer). Visible content is checked with intelligent OCR so genuine screenshots verify cleanly while changed dates or venues get caught immediately.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <div class="text-primary fs-4"><i class="bi bi-shield-shaded"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Never Trust QR Codes in Isolation</h6>
+                        <p class="text-muted small mb-0">
+                            Malicious actors often crop a real QR code and paste it on a fake circular. NoticeShield cross-references visible OCR fields against the cryptographically signed ledger.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Test Notice Demo Card -->
+            <div class="col-lg-6">
+                <div class="card-custom p-4 border-2 border-primary border-opacity-25 shadow">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Hackathon Demo Notice
+                        </h5>
+                        <span class="badge bg-success">Pre-Registered</span>
+                    </div>
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <div class="small text-muted">Notice Title:</div>
+                        <div class="fw-bold text-dark fs-6">NEUROFORGE 2026 – AI Hackathon</div>
+                        <div class="row mt-2 small">
+                            <div class="col-6">
+                                <span class="text-muted">Notice ID:</span> <code class="text-primary">NS-2026-NEURO01</code>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted">Event Date:</span> <strong>06 November 2026</strong>
+                            </div>
+                            <div class="col-12 mt-1">
+                                <span class="text-muted">Venue:</span> GM University Campus, Davanagere
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('download_pdf', notice_id='NS-2026-NEURO01') }}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Download Sample PDF
+                        </a>
+                        <a href="{{ url_for('download_image', notice_id='NS-2026-NEURO01') }}" target="_blank" class="btn btn-outline-secondary btn-sm flex-grow-1">
+                            <i class="bi bi-image me-1"></i> View Notice PNG
+                        </a>
+                        <a href="{{ url_for('verify_notice', notice_id='NS-2026-NEURO01') }}" class="btn btn-primary-custom btn-sm flex-grow-1">
+                            <i class="bi bi-check-circle me-1"></i> Test Verify
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* ── Home-page quick-verify upload helpers ── */
+function previewHomeFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    document.getElementById('home-fname').textContent = file.name;
+    document.getElementById('home-preview').classList.remove('d-none');
+
+    const img  = document.getElementById('home-img-preview');
+    const pdf  = document.getElementById('home-pdf-badge');
+
+    if (file.type === 'application/pdf') {
+        img.classList.add('d-none');
+        pdf.classList.remove('d-none');
+    } else {
+        pdf.classList.add('d-none');
+        img.classList.remove('d-none');
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+    }
+}
+
+function handleHomeDrop(event) {
+    event.preventDefault();
+    document.getElementById('home-dropzone').style.background = 'rgba(255,255,255,0.04)';
+    const dt    = event.dataTransfer;
+    const input = document.getElementById('home-file-input');
+    if (dt.files.length) {
+        // Assign dropped file to the hidden input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(dt.files[0]);
+        input.files = dataTransfer.files;
+        previewHomeFile(input);
+    }
+}
+
+function clearHomeFile() {
+    document.getElementById('home-file-input').value = '';
+    document.getElementById('home-preview').classList.add('d-none');
+    document.getElementById('home-img-preview').classList.add('d-none');
+    document.getElementById('home-pdf-badge').classList.add('d-none');
+}
+
+function showHomeLoading() {
+    const fi = document.getElementById('home-file-input');
+    if (!fi.files.length) return;          // let browser handle required validation
+    document.getElementById('home-verify-btn').disabled = true;
+    document.getElementById('home-loading').classList.remove('d-none');
+}
+</script>
+{% endblock %}

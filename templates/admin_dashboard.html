@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard – NoticeShield{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js for analytics visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-speedometer2 text-primary me-2"></i>Security Operations Dashboard
+            </h2>
+            <p class="text-muted small mb-0">
+                Official Document Registry & Cryptographic Ledger | GM University
+            </p>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+            <a href="{{ url_for('create_notice') }}" class="btn btn-primary-custom d-flex align-items-center gap-1.5 shadow-sm">
+                <i class="bi bi-file-earmark-plus-fill"></i> Register Official Notice
+            </a>
+            <a href="{{ url_for('verify_notice') }}" class="btn btn-outline-secondary d-flex align-items-center gap-1.5">
+                <i class="bi bi-patch-check"></i> Student Portal
+            </a>
+        </div>
+    </div>
+
+    <!-- Analytics Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card-custom p-3.5 border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Total Registered</div>
+                        <div class="fs-3 fw-bold text-dark">{{ stats.total_notices }}</div>
+                        <small class="text-success"><i class="bi bi-check-circle me-1"></i>{{ stats.active_notices }} Active</small>
+                    </div>
+                    <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 fs-3">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card-custom p-3.5 border-start border-4 border-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Verified Genuine</div>
+                        <div class="fs-3 fw-bold text-success">{{ stats.verified_count }}</div>
+                        <small class="text-muted">Passed 100% checks</small>
+                    </div>
+                    <div class="p-3 bg-success bg-opacity-10 text-success rounded-3 fs-3">
+                        <i class="bi bi-shield-fill-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card-custom p-3.5 border-start border-4 border-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Modified / Tampered</div>
+                        <div class="fs-3 fw-bold text-danger">{{ stats.modified_count }}</div>
+                        <small class="text-danger fw-semibold">Altered content caught</small>
+                    </div>
+                    <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-3 fs-3">
+                        <i class="bi bi-shield-fill-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+            <div class="card-custom p-3.5 border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold">Unverified / Revoked</div>
+                        <div class="fs-3 fw-bold text-warning">{{ stats.unverified_count + stats.revoked_notices }}</div>
+                        <small class="text-muted">{{ stats.revoked_notices }} Revoked circulars</small>
+                    </div>
+                    <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3 fs-3">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Chart & Public Key Card -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card-custom p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-pie-chart-fill text-info me-2"></i>Verification Activity Breakdown
+                </h5>
+                <div style="height: 240px; position: relative;">
+                    <canvas id="verificationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-key-fill text-warning me-2"></i>Trusted Ed25519 Public Key
+                    </h5>
+                    <span class="badge bg-dark text-info font-monospace">Backend Isolated</span>
+                </div>
+                <p class="text-muted small mb-2">
+                    Official public verification key published for students and autonomous verifiers. The private key remains secure on the backend.
+                </p>
+                <div class="code-box font-monospace mb-2" style="font-size: 0.75rem; max-height: 140px;">
+                    {{ public_key_pem }}
+                </div>
+                <small class="text-success"><i class="bi bi-shield-check me-1"></i>Cryptographic standard: Curve25519 (EdDSA)</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Notices Management Table -->
+    <div class="card-custom mb-4">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span class="fs-5"><i class="bi bi-journal-text text-primary me-2"></i>Registered Official Notices</span>
+            <span class="badge bg-secondary">{{ notices|length }} Total</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-secondary">
+                    <tr>
+                        <th>NOTICE ID</th>
+                        <th>TITLE & DEPARTMENT</th>
+                        <th>EVENT DATE & VENUE</th>
+                        <th>STATUS</th>
+                        <th>REGISTERED ON</th>
+                        <th class="text-end">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for n in notices %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-dark font-monospace text-info">{{ n.notice_id }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ n.title }}</div>
+                            <small class="text-muted">{{ n.department }}</small>
+                        </td>
+                        <td>
+                            <div><i class="bi bi-calendar-event me-1 text-primary"></i><strong>{{ n.event_date }}</strong></div>
+                            <small class="text-muted"><i class="bi bi-geo-alt me-1 text-danger"></i>{{ n.venue }}</small>
+                        </td>
+                        <td>
+                            {% if n.status == 'active' %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>
+                            {% else %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Revoked</span>
+                            {% endif %}
+                        </td>
+                        <td class="small text-muted font-monospace">
+                            {{ n.created_at }}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('download_pdf', notice_id=n.notice_id) }}" class="btn btn-outline-primary" title="Download Official PDF">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                                <a href="{{ url_for('download_image', notice_id=n.notice_id) }}" target="_blank" class="btn btn-outline-secondary" title="View Notice Image">
+                                    <i class="bi bi-image"></i>
+                                </a>
+                                <a href="{{ url_for('download_qr', notice_id=n.notice_id) }}" target="_blank" class="btn btn-outline-info" title="View QR Code">
+                                    <i class="bi bi-qr-code"></i>
+                                </a>
+                                <a href="{{ url_for('verify_notice', notice_id=n.notice_id) }}" class="btn btn-outline-success" title="Run Verification">
+                                    <i class="bi bi-patch-check"></i>
+                                </a>
+                                {% if n.status == 'active' %}
+                                    <form method="POST" action="{{ url_for('revoke_notice_action', notice_id=n.notice_id) }}" class="d-inline" onsubmit="return confirm('Revoke official notice {{ n.notice_id }}? It will immediately show as REVOKED to students.');">
+                                        <button type="submit" class="btn btn-outline-danger" title="Revoke Notice">
+                                            <i class="bi bi-slash-circle"></i>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="{{ url_for('reactivate_notice_action', notice_id=n.notice_id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-success" title="Reactivate Notice">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            No notices registered yet. Click "Register Official Notice" above to issue one.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Verification Audit Logs -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span class="fs-5"><i class="bi bi-shield-check text-success me-2"></i>Verification Audit Logs</span>
+            <small class="text-muted">Last {{ logs|length }} Verifications</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0 font-monospace" style="font-size: 0.85rem;">
+                <thead class="table-light text-secondary">
+                    <tr>
+                        <th>TIMESTAMP</th>
+                        <th>TARGET NOTICE ID</th>
+                        <th>VERDICT</th>
+                        <th>DETAILS / REASON</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="text-muted">{{ log.verified_at }}</td>
+                        <td>
+                            <strong>{{ log.notice_id }}</strong>
+                        </td>
+                        <td>
+                            {% if log.verification_status == 'VERIFIED' %}
+                                <span class="badge badge-status-verified">VERIFIED</span>
+                            {% elif log.verification_status == 'MODIFIED' %}
+                                <span class="badge badge-status-modified">MODIFIED</span>
+                            {% elif log.verification_status == 'REVOKED' %}
+                                <span class="badge badge-status-revoked">REVOKED</span>
+                            {% else %}
+                                <span class="badge badge-status-unverified">{{ log.verification_status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-truncate" style="max-width: 380px;">
+                            {{ log.result_details }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-3 text-muted">
+                            No verification attempts recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('verificationChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Verified Genuine', 'Modified/Tampered', 'Unverified/Missing QR', 'Revoked'],
+            datasets: [{
+                data: [
+                    {{ stats.verified_count }},
+                    {{ stats.modified_count }},
+                    {{ stats.unverified_count }},
+                    {{ stats.revoked_notices }}
+                ],
+                backgroundColor: [
+                    '#10B981',
+                    '#EF4444',
+                    '#F59E0B',
+                    '#64748B'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        font: { size: 11 }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Official Notice – NoticeShield{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Breadcrumb / Back button -->
+            <div class="mb-3">
+                <a href="{{ url_for('admin_dashboard') }}" class="text-decoration-none text-muted small">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="card-custom p-4 p-md-5 shadow">
+                <div class="border-bottom pb-3 mb-4">
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 mb-2 fw-semibold">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Cryptographic Registration
+                    </span>
+                    <h3 class="fw-bold text-dark mb-1">Issue & Digitally Sign Official Notice</h3>
+                    <p class="text-muted small mb-0">
+                        Notice data entered here is canonicalized into deterministic JSON and digitally signed with the university's <strong>Ed25519 private key</strong> before generating the official PDF circular and QR seal.
+                    </p>
+                </div>
+
+                <form method="POST" action="{{ url_for('create_notice') }}">
+                    <div class="row g-3">
+                        <!-- Notice Title -->
+                        <div class="col-12">
+                            <label for="title" class="form-label fw-semibold text-secondary small">
+                                Notice Title / Subject <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="e.g., NEUROFORGE 2026 – AI Hackathon" required>
+                            <div class="form-text small">Use the exact circular title as it should appear on student circulars.</div>
+                        </div>
+
+                        <!-- Department -->
+                        <div class="col-md-6">
+                            <label for="department" class="form-label fw-semibold text-secondary small">
+                                Department / Organizing Body <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="department" name="department" 
+                                   placeholder="e.g., AIML & Robotics Club" required>
+                        </div>
+
+                        <!-- Issuer Authority -->
+                        <div class="col-md-6">
+                            <label for="issuer" class="form-label fw-semibold text-secondary small">
+                                Authorized Signatory / Issuer <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="issuer" name="issuer" 
+                                   placeholder="e.g., Head of Department / Convener" required>
+                        </div>
+
+                        <!-- Notice Date -->
+                        <div class="col-md-6">
+                            <label for="notice_date" class="form-label fw-semibold text-secondary small">
+                                Notice Issue Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="notice_date" name="notice_date" 
+                                   placeholder="e.g., 06 November 2026" value="06 November 2026" required>
+                        </div>
+
+                        <!-- Event Date -->
+                        <div class="col-md-6">
+                            <label for="event_date" class="form-label fw-semibold text-secondary small">
+                                Event / Reporting Date <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="event_date" name="event_date" 
+                                   placeholder="e.g., 06 November 2026" value="06 November 2026" required>
+                            <div class="form-text small">NoticeShield uses this field to detect altered or fake dates.</div>
+                        </div>
+
+                        <!-- Venue -->
+                        <div class="col-12">
+                            <label for="venue" class="form-label fw-semibold text-secondary small">
+                                Official Venue / Location <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="venue" name="venue" 
+                                   placeholder="e.g., GM University Campus, Davanagere" required>
+                        </div>
+
+                        <!-- Description & Instructions -->
+                        <div class="col-12">
+                            <label for="description" class="form-label fw-semibold text-secondary small">
+                                Notice Description & Instructions <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="4" 
+                                      placeholder="Enter complete notice text, reporting requirements, schedule, and guidelines for students..." required></textarea>
+                            <div class="form-text small">All text is included in canonical serialization for tamper verification.</div>
+                        </div>
+                    </div>
+
+                    <!-- Cryptographic Guarantee Card -->
+                    <div class="p-3 bg-light rounded-3 mt-4 mb-4 border d-flex gap-3 align-items-center">
+                        <div class="fs-2 text-primary">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="small text-muted">
+                            <strong class="text-dark">Cryptographic Integrity Guarantee:</strong>
+                            Upon submission, NoticeShield will assign a unique ID (<code>NS-2026-XXXXXXXX</code>), produce a SHA-256 digest, and digitally sign the record using <strong>Ed25519</strong>. A high-resolution official PDF with an embedded digital seal QR code will be generated automatically.
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom px-4 py-2.5">
+                            <i class="bi bi-patch-check-fill me-1"></i> Sign & Register Notice
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

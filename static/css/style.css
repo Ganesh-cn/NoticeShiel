@@ -1,0 +1,280 @@
+/* NoticeShield - Custom Cybersecurity Theme CSS */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+    --bg-dark: #0B1120;
+    --bg-card-dark: #0F172A;
+    --bg-card-secondary: #1E293B;
+    --accent-blue: #0284C7;
+    --accent-cyan: #38BDF8;
+    --accent-teal: #0D9488;
+    --verified-green: #10B981;
+    --verified-green-bg: #ECFDF5;
+    --modified-red: #EF4444;
+    --modified-red-bg: #FEF2F2;
+    --unverified-amber: #F59E0B;
+    --unverified-amber-bg: #FFFBEB;
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --border-color: #E2E8F0;
+    --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: #F8FAFC;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar */
+.navbar-custom {
+    background: linear-gradient(135deg, #0B1120 0%, #0F172A 100%);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+    padding: 0.85rem 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: -0.5px;
+    color: #FFFFFF !important;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.navbar-brand .shield-icon {
+    color: var(--accent-cyan);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #94A3B8 !important;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0.9rem !important;
+    border-radius: 6px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(180deg, #0B1120 0%, #0F172A 80%, #1E293B 100%);
+    color: #FFFFFF;
+    padding: 4.5rem 1rem 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-title {
+    font-weight: 800;
+    font-size: 2.8rem;
+    letter-spacing: -1px;
+    line-height: 1.15;
+}
+
+.hero-tagline {
+    font-size: 1.25rem;
+    color: var(--accent-cyan);
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+}
+
+.hero-desc {
+    color: #CBD5E1;
+    font-size: 1.05rem;
+    max-width: 650px;
+    margin-bottom: 2rem;
+}
+
+/* Cards & Content */
+.card-custom {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.card-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+}
+
+.card-header-custom {
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 700;
+    padding: 1rem 1.25rem;
+    color: #1E293B;
+}
+
+/* Upload Dropzone */
+.dropzone-container {
+    border: 2px dashed #94A3B8;
+    background: #F8FAFC;
+    border-radius: 12px;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.dropzone-container:hover, .dropzone-container.dragover {
+    border-color: var(--accent-blue);
+    background: #EFF6FF;
+}
+
+.dropzone-icon {
+    font-size: 3rem;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+}
+
+/* Result Banners */
+.result-banner {
+    border-radius: 14px;
+    padding: 2.2rem;
+    color: #FFFFFF;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.result-banner.verified {
+    background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+}
+
+.result-banner.modified {
+    background: linear-gradient(135deg, #B91C1C 0%, #EF4444 100%);
+}
+
+.result-banner.unverified {
+    background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+}
+
+.result-banner.revoked {
+    background: linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%);
+}
+
+/* Status Badges */
+.badge-status-verified {
+    background-color: var(--verified-green-bg);
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+    font-weight: 700;
+}
+
+.badge-status-modified {
+    background-color: var(--modified-red-bg);
+    color: #991B1B;
+    border: 1px solid #FECACA;
+    font-weight: 700;
+}
+
+.badge-status-unverified {
+    background-color: var(--unverified-amber-bg);
+    color: #92400E;
+    border: 1px solid #FDE68A;
+    font-weight: 700;
+}
+
+.badge-status-revoked {
+    background-color: #FEF2F2;
+    color: #7F1D1D;
+    border: 1px solid #FCA5A5;
+    font-weight: 700;
+}
+
+/* Buttons */
+.btn-primary-custom {
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+    border: none;
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+    background: linear-gradient(135deg, #0369A1 0%, #075985 100%);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.btn-success-custom {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    border: none;
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+}
+
+.btn-success-custom:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: #FFFFFF;
+}
+
+/* Code / Monospace */
+.code-box {
+    font-family: var(--font-mono);
+    background: #0F172A;
+    color: #38BDF8;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    overflow-x: auto;
+}
+
+/* Audit Step List */
+.audit-step-item {
+    border-left: 3px solid #CBD5E1;
+    padding-left: 1.25rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.audit-step-item::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #0284C7;
+    border: 2px solid #FFFFFF;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+    background: #0B1120;
+    color: #94A3B8;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2rem 0 1.5rem;
+}
